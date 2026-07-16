@@ -1,3 +1,7 @@
+/**
+ * Module: pricing.test
+ * Purpose: Project runtime and documentation surface.
+ */
 import { describe, expect, it } from "vitest";
 import { contractTiers, PROCUREMENT_SOLE_SOURCE_THRESHOLD_FL_USD } from "./pricing";
 

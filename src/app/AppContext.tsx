@@ -1,3 +1,7 @@
+/**
+ * Module: AppContext
+ * Purpose: Project runtime and documentation surface.
+ */
 import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import {
   economics,
@@ -15,8 +19,13 @@ import {
   type TimelineEvent,
 } from "./mockData";
 import { getForecastSnapshot, getMockForecastSnapshot, type ForecastSnapshot } from "./forecastDataSource";
+import { fetchWeatherSnapshot, type WeatherSnapshot } from "./weatherDataSource";
 
-type LayerKey =
+/**
+ * Centralized app state and action model for dashboard, map, and operations flows.
+ */
+
+export type LayerKey =
   | "sargassum"
   | "currents"
   | "wind"
@@ -131,6 +140,7 @@ const initialState: AppState = {
 };
 
 function reducer(state: AppState, action: AppAction): AppState {
+  // Reducer intentionally keeps all operational state transitions explicit and testable.
   switch (action.type) {
     case "SET_JURISDICTION": {
       return {
@@ -145,13 +155,8 @@ function reducer(state: AppState, action: AppAction): AppState {
     case "SET_LAYER":
       return { ...state, layers: { ...state.layers, [action.payload.key]: action.payload.value } };
     case "SET_WORKSPACE_TAB": {
-      const event: FeedEvent = {
-        id: `tab-${Date.now()}`,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        text: `Workspace tab opened: ${action.payload}`,
-        category: action.payload === "Reports" ? "Alerts" : "Operations",
-      };
-
+      // Each tab activates real, distinct state (filters/layers/panels) — no decorative
+      // feed entry is added here since opening a tab is not itself an operational event.
       if (action.payload === "Dashboard") {
         return {
           ...state,
@@ -159,7 +164,6 @@ function reducer(state: AppState, action: AppAction): AppState {
           feedFilter: "All",
           mapLayerPanelOpen: false,
           selectedAssetId: null,
-          feed: [event, ...state.feed],
         };
       }
 
@@ -169,7 +173,6 @@ function reducer(state: AppState, action: AppAction): AppState {
           workspaceTab: action.payload,
           feedFilter: "Operations",
           mapLayerPanelOpen: false,
-          feed: [event, ...state.feed],
         };
       }
 
@@ -180,7 +183,6 @@ function reducer(state: AppState, action: AppAction): AppState {
           feedFilter: "Operations",
           selectedAssetId: state.assets[0]?.id ?? null,
           mapLayerPanelOpen: false,
-          feed: [event, ...state.feed],
         };
       }
 
@@ -191,7 +193,6 @@ function reducer(state: AppState, action: AppAction): AppState {
           feedFilter: "Satellite",
           layers: { ...state.layers, chlorophyll: true, currents: true },
           mapLayerPanelOpen: true,
-          feed: [event, ...state.feed],
         };
       }
 
@@ -201,16 +202,15 @@ function reducer(state: AppState, action: AppAction): AppState {
           workspaceTab: action.payload,
           feedFilter: "Alerts",
           mapLayerPanelOpen: true,
-          feed: [event, ...state.feed],
         };
       }
 
+      // Settings is a real destination (layer visibility controls) — it must not
+      // hijack the unrelated Deploy Package confirmation modal.
       return {
         ...state,
         workspaceTab: action.payload,
-        deployModalOpen: true,
         mapLayerPanelOpen: false,
-        feed: [event, ...state.feed],
       };
     }
     case "SELECT_ASSET":
@@ -331,13 +331,19 @@ type AppContextValue = {
   timelineEvents: TimelineEvent[];
   economics: typeof economics;
   filteredFeed: FeedEvent[];
+  alertCount: number;
+  weather: WeatherSnapshot | null;
 };
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
+/**
+ * App-level provider that enriches base reducer state with provider forecast data.
+ */
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [forecast, setForecast] = useState<ForecastSnapshot>(getMockForecastSnapshot());
+  const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -349,6 +355,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .catch(() => {
         setForecast(getMockForecastSnapshot("NOAA request cancelled or unavailable"));
       });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [state.selectedJurisdiction]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const center = jurisdictions.find((j) => j.name === state.selectedJurisdiction)?.center;
+    if (!center) return;
+
+    fetchWeatherSnapshot(center[1], center[0], abortController.signal).then(setWeather);
 
     return () => {
       abortController.abort();
@@ -372,6 +390,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return contextualState.feed.filter((item) => item.category === contextualState.feedFilter);
   }, [contextualState.feed, contextualState.feedFilter]);
 
+  // Single shared source for "how many alerts are active" so every consumer
+  // (top bar, nav rail, shell) reads the same number instead of recomputing it.
+  const alertCount = useMemo(
+    () => contextualState.feed.filter((item) => item.category === "Alerts").length,
+    [contextualState.feed],
+  );
+
   const value = useMemo(
     () => ({
       state: contextualState,
@@ -386,8 +411,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       timelineEvents,
       economics,
       filteredFeed,
+      alertCount,
+      weather,
     }),
-    [contextualState, filteredFeed, forecast],
+    [contextualState, filteredFeed, alertCount, forecast, weather],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -400,4 +427,4 @@ export function useAppContext() {
 }
 
 export { reducer, initialState };
-export type { LayerKey, FeedCategory, MissionForm, WorkspaceTab };
+export type { FeedCategory, MissionForm, WorkspaceTab };

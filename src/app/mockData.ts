@@ -1,3 +1,7 @@
+/**
+ * Module: mockData
+ * Purpose: Project runtime and documentation surface.
+ */
 export type Jurisdiction = {
   id: string;
   name: string;

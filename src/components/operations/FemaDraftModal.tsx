@@ -1,3 +1,7 @@
+/**
+ * Module: FemaDraftModal
+ * Purpose: Project runtime and documentation surface.
+ */
 import type { Mission } from "../../app/mockData";
 
 type FemaDraftModalProps = {

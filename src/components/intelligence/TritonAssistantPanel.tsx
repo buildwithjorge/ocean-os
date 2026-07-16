@@ -1,3 +1,7 @@
+/**
+ * Module: TritonAssistantPanel
+ * Purpose: Project runtime and documentation surface.
+ */
 import { StatusBadge } from "../shared/StatusBadge";
 import { useAppContext } from "../../app/AppContext";
 

@@ -1,3 +1,7 @@
+/**
+ * Module: playbackTicker.test
+ * Purpose: Project runtime and documentation surface.
+ */
 import { describe, expect, it } from "vitest";
 import { getNextTimelineOffset } from "./App";
 

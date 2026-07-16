@@ -1,3 +1,7 @@
+/**
+ * Module: forecastDataSource.test
+ * Purpose: Project runtime and documentation surface.
+ */
 import { describe, expect, it } from "vitest";
 import { __forecastInternals } from "./forecastDataSource";
 

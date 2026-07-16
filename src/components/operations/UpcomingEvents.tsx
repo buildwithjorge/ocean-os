@@ -1,3 +1,7 @@
+/**
+ * Module: UpcomingEvents
+ * Purpose: Project runtime and documentation surface.
+ */
 import { Panel } from "../shared/Panel";
 
 const events = [

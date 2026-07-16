@@ -1,3 +1,7 @@
+/**
+ * Module: Metric
+ * Purpose: Project runtime and documentation surface.
+ */
 export function Metric({ label, value, delta }: { label: string; value: string; delta?: string }) {
   return (
     <div className="metric">

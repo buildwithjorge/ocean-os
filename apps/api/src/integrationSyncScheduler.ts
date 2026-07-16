@@ -1,5 +1,13 @@
+/**
+ * Module: integrationSyncScheduler
+ * Purpose: Project runtime and documentation surface.
+ */
 import { prisma } from "./db";
 import { fetchNoaaNdbcObservation } from "./providers/noaaNdbc";
+
+/**
+ * Scheduler with overlap protection for provider ingestion into persistence.
+ */
 
 let running = false;
 let intervalHandle: NodeJS.Timeout | null = null;
@@ -31,6 +39,7 @@ export async function stopIntegrationSyncScheduler() {
 }
 
 export async function runIntegrationSync(trigger: "startup" | "interval" | "manual") {
+  // Guard against overlapping runs so one slow provider call does not duplicate writes.
   if (running) {
     console.log(`[sync] skipped (${trigger}) because previous run is active`);
     return;

@@ -1,3 +1,7 @@
+/**
+ * Module: types
+ * Purpose: Project runtime and documentation surface.
+ */
 import type { SeverityLevel } from "./severity";
 
 export type FeedEventCategory = "Alerts" | "Operations" | "Maintenance";

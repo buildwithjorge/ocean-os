@@ -1,3 +1,7 @@
+/**
+ * Module: ForecastTrack
+ * Purpose: Project runtime and documentation surface.
+ */
 import type maplibregl from "maplibre-gl";
 import type { ForecastCheckpoint } from "../../app/mockData";
 

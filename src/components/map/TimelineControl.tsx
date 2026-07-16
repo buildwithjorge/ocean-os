@@ -1,13 +1,21 @@
+/**
+ * Module: TimelineControl
+ * Purpose: Project runtime and documentation surface.
+ */
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, List, Play, Pause } from "lucide-react";
 import { useAppContext } from "../../app/AppContext";
 
 const stops = [-24, -12, 0, 12, 24, 48, 72];
 
+/**
+ * Timeline transport and event shortcuts used to drive scenario playback.
+ */
 export function TimelineControl() {
   const { state, dispatch, timelineEvents } = useAppContext();
   const [eventsOpen, setEventsOpen] = useState(true);
 
+  // Applies event-specific presets so each timeline shortcut has operational impact.
   const onTimelineEventClick = (eventId: string) => {
     const selected = timelineEvents.find((item) => item.id === eventId);
     if (!selected) return;
@@ -38,8 +46,6 @@ export function TimelineControl() {
       dispatch({ type: "SET_LAYER", payload: { key: "wave", value: true } });
       dispatch({ type: "SET_FEED_FILTER", payload: "Alerts" });
     }
-
-    dispatch({ type: "ADD_FEED_EVENT", payload: { text: `Timeline event selected: ${selected.label}`, category: "Operations" } });
   };
 
   return (

@@ -1,3 +1,7 @@
+/**
+ * Module: BottomOperationsGrid
+ * Purpose: Project runtime and documentation surface.
+ */
 import { LiveAssetsPanel } from "./LiveAssetsPanel";
 import { MissionBuilder } from "./MissionBuilder";
 import { OperationalFeed } from "./OperationalFeed";

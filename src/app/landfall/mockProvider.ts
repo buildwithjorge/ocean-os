@@ -1,3 +1,7 @@
+/**
+ * Module: mockProvider
+ * Purpose: Project runtime and documentation surface.
+ */
 import { forecastCheckpoints } from "../mockData";
 import type { ForecastSnapshot } from "../forecastDataSource";
 import type { ForecastRequestContext, SargassumForecastProvider } from "./provider";

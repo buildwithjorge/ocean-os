@@ -1,3 +1,7 @@
+/**
+ * Module: noaaNdbc
+ * Purpose: Project runtime and documentation surface.
+ */
 export type NoaaNdbcObservation = {
   stationId: string;
   observedAt: string;
@@ -11,6 +15,9 @@ export type NoaaNdbcObservation = {
 
 const DEFAULT_TIMEOUT_MS = Number(process.env.NOAA_NDBC_TIMEOUT_MS ?? 12000);
 
+/**
+ * Fetches and parses NOAA NDBC station text feed with timeout protection.
+ */
 export async function fetchNoaaNdbcObservation(stationId: string): Promise<NoaaNdbcObservation> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
@@ -53,6 +60,7 @@ type ParsedNdbc = {
 };
 
 function parseNdbcRealtimeText(raw: string): ParsedNdbc {
+  // NDBC realtime files are fixed-width text tables where line 1 is headers.
   const lines = raw
     .split("\n")
     .map((line) => line.trim())

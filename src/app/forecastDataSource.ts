@@ -1,7 +1,15 @@
+/**
+ * Module: forecastDataSource
+ * Purpose: Project runtime and documentation surface.
+ */
 import type { ForecastCheckpoint } from "./mockData";
 import { MockSargassumForecastProvider, buildMockForecastSnapshot } from "./landfall/mockProvider";
 import { NoaaErddapSargassumProvider, __noaaInternals } from "./landfall/noaaErddapProvider";
 import type { SargassumForecastProvider } from "./landfall/provider";
+
+/**
+ * Unified forecast shape consumed by the UI regardless of provider.
+ */
 
 export type ForecastConfidence = "High" | "Medium" | "Low";
 
@@ -25,10 +33,16 @@ const providerMap: Record<ForecastSnapshot["source"], SargassumForecastProvider>
   "noaa-erddap": new NoaaErddapSargassumProvider(),
 };
 
+/**
+ * Returns a deterministic local snapshot for preview and fallback flows.
+ */
 export function getMockForecastSnapshot(note?: string): ForecastSnapshot {
   return buildMockForecastSnapshot(note);
 }
 
+/**
+ * Resolves the configured provider and returns a resilient snapshot.
+ */
 export async function getForecastSnapshot(options?: { signal?: AbortSignal; jurisdiction?: string }): Promise<ForecastSnapshot> {
   const source = import.meta.env.VITE_SARGASSUM_SOURCE === "noaa-erddap" ? "noaa-erddap" : "mock";
   const provider = providerMap[source];

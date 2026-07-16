@@ -1,3 +1,7 @@
+/**
+ * Module: Panel
+ * Purpose: Project runtime and documentation surface.
+ */
 import type { ReactNode } from "react";
 
 type PanelProps = {

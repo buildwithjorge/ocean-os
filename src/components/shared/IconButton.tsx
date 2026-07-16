@@ -1,3 +1,7 @@
+/**
+ * Module: IconButton
+ * Purpose: Project runtime and documentation surface.
+ */
 import type { ReactNode } from "react";
 
 type IconButtonProps = {

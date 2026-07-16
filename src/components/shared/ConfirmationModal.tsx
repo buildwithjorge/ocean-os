@@ -1,3 +1,7 @@
+/**
+ * Module: ConfirmationModal
+ * Purpose: Project runtime and documentation surface.
+ */
 type ConfirmationModalProps = {
   open: boolean;
   title: string;

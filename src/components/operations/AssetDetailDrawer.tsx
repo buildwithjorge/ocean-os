@@ -1,3 +1,7 @@
+/**
+ * Module: AssetDetailDrawer
+ * Purpose: Project runtime and documentation surface.
+ */
 import type { Asset } from "../../app/mockData";
 
 export function AssetDetailDrawer({ asset, onClose }: { asset: Asset | null; onClose: () => void }) {

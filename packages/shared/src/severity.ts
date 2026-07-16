@@ -1,3 +1,7 @@
+/**
+ * Module: severity
+ * Purpose: Project runtime and documentation surface.
+ */
 export type SeverityLevel = "low" | "moderate" | "high" | "severe" | "extreme";
 
 export const severityColors: Record<SeverityLevel, string> = {

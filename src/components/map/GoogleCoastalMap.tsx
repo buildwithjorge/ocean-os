@@ -1,9 +1,17 @@
+/**
+ * Module: GoogleCoastalMap
+ * Purpose: Project runtime and documentation surface.
+ */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, Compass, Crosshair, Layers3, LocateFixed, Palette, Ruler, Save, ZoomIn, ZoomOut } from "lucide-react";
 import { useAppContext } from "../../app/AppContext";
 import { coastalLabels } from "../../app/mockData";
 import { MapLayerControl } from "./MapLayerControl";
 import { TimelineControl } from "./TimelineControl";
+
+/**
+ * Google provider map implementation with operational overlays and controls.
+ */
 
 type BeachCounty = "Palm Beach" | "Broward" | "Miami-Dade";
 
@@ -156,6 +164,7 @@ export function GoogleCoastalMap() {
     });
   }, [dispatch, drawOn]);
 
+  // Rebuilds county-aware beach markers and selected ring for current filters.
   const refreshBeachMarkers = () => {
     const map = mapRef.current;
     if (!map) return;
@@ -201,6 +210,7 @@ export function GoogleCoastalMap() {
     }
   };
 
+  // Synchronizes forecast track polyline visibility with active layer state.
   const refreshForecastLine = () => {
     const map = mapRef.current;
     if (!map) return;
@@ -236,6 +246,7 @@ export function GoogleCoastalMap() {
     forecastLineRef.current.setVisible(show);
   };
 
+  // Keeps impact marker aligned with timeline focus center.
   const refreshImpactMarker = () => {
     const map = mapRef.current;
     if (!map) return;
@@ -259,6 +270,7 @@ export function GoogleCoastalMap() {
     }
   };
 
+  // Samples marine current data and renders directional vector lines.
   const refreshCurrentVectors = async () => {
     const map = mapRef.current;
     if (!map || !state.layers.currents) return;
@@ -314,8 +326,7 @@ export function GoogleCoastalMap() {
     if (!map) return;
 
     map.setMapTypeId(basemapMode);
-    dispatch({ type: "ADD_FEED_EVENT", payload: { text: `Basemap switched to google-${basemapMode}`, category: "Operations" } });
-  }, [basemapMode, dispatch]);
+  }, [basemapMode]);
 
   useEffect(() => {
     refreshBeachMarkers();
@@ -346,9 +357,7 @@ export function GoogleCoastalMap() {
       map.panTo({ lat: c[1], lng: c[0] });
       map.setZoom(10.5);
     }
-
-    dispatch({ type: "ADD_FEED_EVENT", payload: { text: `County filter set to ${selectedCounty}`, category: "Operations" } });
-  }, [dispatch, selectedCounty]);
+  }, [selectedCounty]);
 
   const map = mapRef.current;
 
@@ -437,11 +446,7 @@ export function GoogleCoastalMap() {
           aria-label="Draw"
           className={drawOn ? "active" : ""}
           onClick={() => {
-            setDrawOn((enabled) => {
-              const next = !enabled;
-              dispatch({ type: "ADD_FEED_EVENT", payload: { text: `Draw mode ${next ? "enabled" : "disabled"}`, category: "Operations" } });
-              return next;
-            });
+            setDrawOn((enabled) => !enabled);
           }}
         >
           <Crosshair size={14} />

@@ -1,18 +1,25 @@
-import { Bell, Search, UserCircle2, Wind } from "lucide-react";
+/**
+ * Module: TopCommandBar
+ * Purpose: Project runtime and documentation surface.
+ */
+import { Bell, UserCircle2, Wind } from "lucide-react";
 import { StatusBadge } from "../shared/StatusBadge";
 import { useAppContext } from "../../app/AppContext";
 import type { WorkspaceTab } from "../../app/AppContext";
+import { degToCompass } from "../../app/weatherDataSource";
 
 const tabs: WorkspaceTab[] = ["Dashboard", "Operations", "Assets", "Analytics", "Reports", "Settings"];
 
-const kpiChips = [
-  { label: "Beaches Online", value: "23" },
-  { label: "Severe Alerts", value: "11", tone: "critical" as const },
-];
-
 export function TopCommandBar() {
-  const { state, dispatch } = useAppContext();
+  const { state, jurisdictions, dispatch, alertCount, weather } = useAppContext();
   const now = new Date();
+
+  // KPI chips are derived from real state instead of hardcoded values, reusing
+  // the same alertCount computed once in AppContext.
+  const kpiChips = [
+    { label: "Beaches Online", value: String(jurisdictions.length) },
+    { label: "Severe Alerts", value: String(alertCount), tone: alertCount > 0 ? ("critical" as const) : undefined },
+  ];
 
   const onTabClick = (tab: WorkspaceTab) => {
     dispatch({ type: "SET_WORKSPACE_TAB", payload: tab });
@@ -51,36 +58,29 @@ export function TopCommandBar() {
         <button
           type="button"
           className="icon-chip"
-          aria-label="Search"
-          onClick={() => dispatch({ type: "ADD_FEED_EVENT", payload: { text: "Search command opened", category: "Operations" } })}
-        >
-          <Search size={14} />
-        </button>
-        <button
-          type="button"
-          className="icon-chip"
           aria-label="Notifications"
-          onClick={() => {
-            dispatch({ type: "SET_FEED_FILTER", payload: "Alerts" });
-            dispatch({ type: "ADD_FEED_EVENT", payload: { text: "Alerts filter applied from top bar", category: "Alerts" } });
-          }}
+          onClick={() => dispatch({ type: "SET_FEED_FILTER", payload: "Alerts" })}
         >
           <Bell size={14} />
+          {alertCount > 0 ? <span className="alert-dot">{alertCount}</span> : null}
         </button>
         <div className="clock-wrap">
           <strong>{now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong>
           <span>{now.toLocaleDateString()}</span>
         </div>
-        <div className="weather-wrap">
-          <span>84F</span>
-          <span className="wind"><Wind size={14} /> 18 mph ESE</span>
+        <div className="weather-wrap" title={weather?.source === "fallback" ? "Live weather unavailable — showing estimated conditions" : "Live conditions from Open-Meteo"}>
+          <span>{weather ? `${weather.tempF}F${weather.source === "fallback" ? " (est.)" : ""}` : "--"}</span>
+          <span className="wind">
+            <Wind size={14} />
+            {weather ? ` ${weather.windMph} mph ${degToCompass(weather.windDirectionDeg)}` : " --"}
+          </span>
         </div>
         <StatusBadge label="Connected" tone="ok" />
         <button
           type="button"
           className="profile-btn"
-          aria-label="User profile"
-          onClick={() => dispatch({ type: "ADD_FEED_EVENT", payload: { text: "Profile panel requested", category: "Operations" } })}
+          aria-label="Open settings"
+          onClick={() => dispatch({ type: "SET_WORKSPACE_TAB", payload: "Settings" })}
         >
           <UserCircle2 size={18} />
           <div>

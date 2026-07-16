@@ -1,3 +1,7 @@
+/**
+ * Module: MissionBuilder
+ * Purpose: Project runtime and documentation surface.
+ */
 import { Panel } from "../shared/Panel";
 import { useAppContext } from "../../app/AppContext";
 

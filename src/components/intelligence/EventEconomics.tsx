@@ -1,3 +1,7 @@
+/**
+ * Module: EventEconomics
+ * Purpose: Project runtime and documentation surface.
+ */
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { useAppContext } from "../../app/AppContext";
 

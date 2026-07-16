@@ -1,3 +1,7 @@
+/**
+ * Module: MissionDetailDrawer
+ * Purpose: Project runtime and documentation surface.
+ */
 import type { Mission } from "../../app/mockData";
 
 export function MissionDetailDrawer({ mission, onClose }: { mission: Mission | null; onClose: () => void }) {

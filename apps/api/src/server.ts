@@ -1,6 +1,14 @@
+/**
+ * Module: server
+ * Purpose: Project runtime and documentation surface.
+ */
 import express from "express";
 import { prisma } from "./db";
 import { runIntegrationSync, startIntegrationSyncScheduler, stopIntegrationSyncScheduler } from "./integrationSyncScheduler";
+
+/**
+ * API entrypoint exposing health, data read endpoints, and manual sync trigger.
+ */
 
 const app = express();
 app.use(express.json());
@@ -9,6 +17,7 @@ app.get("/api/v1/health", (_req, res) => {
   res.json({ ok: true, service: "triton-api", now: new Date().toISOString() });
 });
 
+// Returns active beaches with most recent forecast and observation attached.
 app.get("/api/v1/beaches", async (_req, res) => {
   const beaches = await prisma.beach.findMany({
     where: { active: true },
@@ -26,6 +35,7 @@ app.get("/api/v1/feed", async (_req, res) => {
   res.json(items);
 });
 
+// Allows operators to trigger ingestion without waiting for scheduler interval.
 app.post("/api/v1/sync/run", async (_req, res) => {
   await runIntegrationSync("manual");
   res.status(202).json({ accepted: true });

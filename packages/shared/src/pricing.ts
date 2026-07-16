@@ -1,3 +1,7 @@
+/**
+ * Module: pricing
+ * Purpose: Project runtime and documentation surface.
+ */
 export const PROCUREMENT_SOLE_SOURCE_THRESHOLD_FL_USD = 35000;
 
 export const contractTiers = {

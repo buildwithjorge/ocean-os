@@ -1,3 +1,7 @@
+/**
+ * Module: RiskDriverList
+ * Purpose: Project runtime and documentation surface.
+ */
 import { useAppContext } from "../../app/AppContext";
 import { StatusBadge } from "../shared/StatusBadge";
 

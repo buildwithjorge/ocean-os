@@ -1,3 +1,7 @@
+/**
+ * Module: TsiArcGauge
+ * Purpose: Project runtime and documentation surface.
+ */
 import { severityColors, severityFromRiskIndex } from "../../../packages/shared/src";
 
 type TsiArcGaugeProps = {

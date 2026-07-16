@@ -1,11 +1,21 @@
+/**
+ * Module: App
+ * Purpose: Project runtime and documentation surface.
+ */
 import { useEffect } from "react";
 import { AppProvider, useAppContext } from "./AppContext";
 import { AppShell } from "../components/layout/AppShell";
 
+/**
+ * Cycles the timeline window in fixed 12-hour increments.
+ */
 export function getNextTimelineOffset(currentOffset: number): number {
   return currentOffset >= 72 ? -24 : currentOffset + 12;
 }
 
+/**
+ * Drives autonomous timeline playback while preserving playback state.
+ */
 function PlaybackTicker() {
   const { state, dispatch } = useAppContext();
 

@@ -1,3 +1,7 @@
+/**
+ * Module: MapLibreCoastalMap
+ * Purpose: Project runtime and documentation surface.
+ */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -8,6 +12,10 @@ import { MapLayerControl } from "./MapLayerControl";
 import { TimelineControl } from "./TimelineControl";
 import { addForecastLayers } from "./ForecastTrack";
 import { CurrentParticles } from "./CurrentParticles";
+
+/**
+ * MapLibre provider map implementation for full local/open-source map mode.
+ */
 
 type BeachCounty = "Palm Beach" | "Broward" | "Miami-Dade";
 
@@ -110,6 +118,7 @@ export function MapLibreCoastalMap() {
     return `Track starts ${next.label} and projects drift toward shoreline checkpoints.`;
   }, [forecastCheckpoints]);
 
+  // Creates or refreshes static operational overlay layers after style load.
   const initializeOperationalLayers = useCallback((map: maplibregl.Map) => {
     addForecastLayers(map, forecastCheckpoints);
 
@@ -196,6 +205,7 @@ export function MapLibreCoastalMap() {
     }
   }, [forecastCheckpoints, selectedCenter, state.selectedJurisdiction]);
 
+  // Draws vector lines representing sampled current direction and speed.
   const renderCurrentGrid = useCallback((map: maplibregl.Map, center: [number, number], samples: CurrentSample[]) => {
     const lineFeatures = samples.map((sample, index) => {
       const [dx, dy] = vectorFromDirection(sample.direction, 0.05 + sample.speed * 0.05);
@@ -248,6 +258,7 @@ export function MapLibreCoastalMap() {
     }
   }, [state.layers.currents]);
 
+  // Fetches current samples around the selected center and updates map vectors.
   const refreshCurrentGrid = useCallback(async (center: [number, number], signal?: AbortSignal) => {
     if (!state.layers.currents) return;
 
@@ -358,8 +369,7 @@ export function MapLibreCoastalMap() {
     const map = mapRef.current;
     if (!map) return;
     map.setStyle(basemapStyles[basemapKey]);
-    dispatch({ type: "ADD_FEED_EVENT", payload: { text: `Basemap switched to ${basemapKey}`, category: "Operations" } });
-  }, [basemapKey, dispatch]);
+  }, [basemapKey]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -388,8 +398,7 @@ export function MapLibreCoastalMap() {
       const target = countyCenters[selectedCounty] ?? selectedCenter;
       map.flyTo({ center: target, zoom: 10.6, duration: 580 });
     }
-    dispatch({ type: "ADD_FEED_EVENT", payload: { text: `County filter set to ${selectedCounty}`, category: "Operations" } });
-  }, [dispatch, selectedCenter, selectedCounty]);
+  }, [selectedCenter, selectedCounty]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -497,11 +506,7 @@ export function MapLibreCoastalMap() {
           aria-label="Draw"
           className={drawOn ? "active" : ""}
           onClick={() => {
-            setDrawOn((enabled) => {
-              const next = !enabled;
-              dispatch({ type: "ADD_FEED_EVENT", payload: { text: `Draw mode ${next ? "enabled" : "disabled"}`, category: "Operations" } });
-              return next;
-            });
+            setDrawOn((enabled) => !enabled);
           }}
         >
           <Crosshair size={14} />

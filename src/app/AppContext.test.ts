@@ -1,3 +1,7 @@
+/**
+ * Module: AppContext.test
+ * Purpose: Project runtime and documentation surface.
+ */
 import { describe, expect, it } from "vitest";
 import { initialState, reducer } from "./AppContext";
 
@@ -30,6 +34,6 @@ describe("AppContext reducer", () => {
 
     expect(next.workspaceTab).toBe("Assets");
     expect(next.selectedAssetId).toBeTruthy();
-    expect(next.feed[0].text).toContain("Workspace tab opened: Assets");
+    expect(next.feedFilter).toBe("Operations");
   });
 });

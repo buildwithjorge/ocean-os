@@ -1,3 +1,7 @@
+/**
+ * Module: ResponsePackage
+ * Purpose: Project runtime and documentation surface.
+ */
 import { useAppContext } from "../../app/AppContext";
 
 export function ResponsePackage() {

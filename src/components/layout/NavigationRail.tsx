@@ -1,10 +1,14 @@
+/**
+ * Module: NavigationRail
+ * Purpose: Project runtime and documentation surface.
+ */
 import { useState } from "react";
 import {
   Bell,
   ChartNoAxesCombined,
-  Camera,
   Cloud,
   Command,
+  Image as ImageIcon,
   Layers3,
   Radar,
   Settings,
@@ -13,29 +17,43 @@ import {
 } from "lucide-react";
 import { Tooltip } from "../shared/Tooltip";
 import { useAppContext } from "../../app/AppContext";
+import { degToCompass } from "../../app/weatherDataSource";
 
 const navItems = [
   { key: "command", label: "Command Center", icon: <Command size={16} /> },
   { key: "layers", label: "Map Layers", icon: <Layers3 size={16} /> },
   { key: "sensors", label: "Sensors", icon: <Radar size={16} /> },
   { key: "weather", label: "Weather", icon: <Cloud size={16} /> },
-  { key: "cameras", label: "Cameras", icon: <Camera size={16} /> },
+  { key: "cameras", label: "Satellite Imagery", icon: <ImageIcon size={16} /> },
   { key: "alerts", label: "Alerts", icon: <Bell size={16} /> },
   { key: "analytics", label: "Analytics", icon: <ChartNoAxesCombined size={16} /> },
-  { key: "maintenance", label: "Maintenance", icon: <Wrench size={16} /> },
+  { key: "maintenance", label: "Fleet Readiness", icon: <Wrench size={16} /> },
   { key: "settings", label: "Settings", icon: <Settings size={16} /> },
 ];
 
 export function NavigationRail() {
-  const { dispatch } = useAppContext();
+  const { state, dispatch, alertCount, weather } = useAppContext();
   const [activeKey, setActiveKey] = useState(navItems[0].key);
+  const [openPopover, setOpenPopover] = useState<string | null>(null);
 
-  const onNavClick = (key: string, label: string) => {
+  const lowResourceAssets = state.assets.filter((asset) => {
+    const match = /^(\d+)%$/.exec(asset.resource);
+    return match ? Number(match[1]) < 80 : false;
+  });
+
+  const onNavClick = (key: string) => {
     setActiveKey(key);
+    setOpenPopover((current) => {
+      if (key === "sensors" || key === "weather" || key === "maintenance") {
+        return current === key ? null : key;
+      }
+      return null;
+    });
 
     if (key === "command") {
       dispatch({ type: "SET_FEED_FILTER", payload: "All" });
       dispatch({ type: "SET_MAP_LAYER_PANEL", payload: false });
+      dispatch({ type: "SET_WORKSPACE_TAB", payload: "Dashboard" });
     }
     if (key === "layers") {
       dispatch({ type: "TOGGLE_MAP_LAYER_PANEL" });
@@ -53,18 +71,14 @@ export function NavigationRail() {
       dispatch({ type: "SET_FEED_FILTER", payload: "Alerts" });
     }
     if (key === "analytics") {
-      dispatch({ type: "TOGGLE_LAYER", payload: "chlorophyll" });
-      dispatch({ type: "SET_FEED_FILTER", payload: "Satellite" });
+      dispatch({ type: "SET_WORKSPACE_TAB", payload: "Analytics" });
     }
     if (key === "maintenance") {
       dispatch({ type: "SET_FEED_FILTER", payload: "Operations" });
-      dispatch({ type: "TOGGLE_LAYER", payload: "municipal" });
     }
     if (key === "settings") {
-      dispatch({ type: "OPEN_DEPLOY_MODAL", payload: true });
+      dispatch({ type: "SET_WORKSPACE_TAB", payload: "Settings" });
     }
-
-    dispatch({ type: "ADD_FEED_EVENT", payload: { text: `Navigation switched to ${label}`, category: "Operations" } });
   };
 
   return (
@@ -72,14 +86,63 @@ export function NavigationRail() {
       <div className="rail-items">
         {navItems.map((item) => (
           <Tooltip text={item.label} key={item.key}>
-            <button
-              type="button"
-              className={`rail-btn ${activeKey === item.key ? "active" : ""}`}
-              aria-label={item.label}
-              onClick={() => onNavClick(item.key, item.label)}
-            >
-              {item.icon}
-            </button>
+            <div className="rail-item-wrap">
+              <button
+                type="button"
+                className={`rail-btn ${activeKey === item.key ? "active" : ""}`}
+                aria-label={item.label}
+                onClick={() => onNavClick(item.key)}
+              >
+                {item.icon}
+              </button>
+              {openPopover === item.key ? (
+                <div className="nav-popover" role="dialog" aria-label={`${item.label} panel`}>
+                  {item.key === "sensors" ? (
+                    <>
+                      <strong>Sensor Readings</strong>
+                      <ul>
+                        {state.riskDrivers.map((driver) => (
+                          <li key={driver.key}>
+                            <span>{driver.label}</span>
+                            <span className={`level-${driver.level.toLowerCase()}`}>{driver.value}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : null}
+                  {item.key === "weather" ? (
+                    <>
+                      <strong>Live Conditions</strong>
+                      {weather ? (
+                        <p>
+                          {weather.tempF}F &middot; {weather.windMph} mph {degToCompass(weather.windDirectionDeg)}
+                          {weather.source === "fallback" ? " (estimated)" : ""}
+                        </p>
+                      ) : (
+                        <p>Loading…</p>
+                      )}
+                    </>
+                  ) : null}
+                  {item.key === "maintenance" ? (
+                    <>
+                      <strong>Fleet Readiness</strong>
+                      {lowResourceAssets.length > 0 ? (
+                        <ul>
+                          {lowResourceAssets.map((asset) => (
+                            <li key={asset.id}>
+                              <span>{asset.name}</span>
+                              <span>{asset.resource}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>All {state.assets.length} assets above 80% resource.</p>
+                      )}
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
           </Tooltip>
         ))}
       </div>
@@ -91,11 +154,10 @@ export function NavigationRail() {
           onClick={() => {
             setActiveKey("alerts");
             dispatch({ type: "SET_FEED_FILTER", payload: "Alerts" });
-            dispatch({ type: "ADD_FEED_EVENT", payload: { text: "Alert center opened", category: "Alerts" } });
           }}
         >
           <TriangleAlert size={16} />
-          <span className="alert-dot">4</span>
+          {alertCount > 0 ? <span className="alert-dot">{alertCount}</span> : null}
         </button>
       </div>
     </aside>

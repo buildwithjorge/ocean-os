@@ -1,3 +1,7 @@
+/**
+ * Module: MapLayerControl
+ * Purpose: Project runtime and documentation surface.
+ */
 import { useAppContext } from "../../app/AppContext";
 
 const layerConfig = [
