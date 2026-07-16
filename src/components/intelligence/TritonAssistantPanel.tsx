@@ -22,15 +22,15 @@ function generateRecommendations(
   ];
 }
 
-export function TritonAICopilot() {
+export function TritonAssistantPanel() {
   const { state, forecastUpdatedAt, forecastMethodologyNote } = useAppContext();
   const recommendations = generateRecommendations(state.selectedJurisdiction, state.assets, state.arrivalEta, state.missionForm);
   const updatedLabel = new Date(forecastUpdatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="copilot-block">
-      <div className="copilot-header">
-        <h4>Triton Copilot</h4>
+    <div className="assistant-block">
+      <div className="assistant-header">
+        <h4>Triton Assistant</h4>
         <StatusBadge label="Rule-based decision support" tone="info" />
       </div>
       <p className="situation-brief">

@@ -98,13 +98,13 @@
   color: var(--text-muted);
 }
 
-.copilot-header {
+.assistant-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.copilot-header h4,
+.assistant-header h4,
 .econ-title-row h4,
 .pkg-head h4 {
   margin: 0;

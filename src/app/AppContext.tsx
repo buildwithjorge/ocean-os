@@ -58,7 +58,7 @@ type AppState = {
   layers: Record<LayerKey, boolean>;
   timelineHourOffset: number;
   playbackRunning: boolean;
-  copilotOnline: boolean;
+  assistantOnline: boolean;
   deployModalOpen: boolean;
   mapLayerPanelOpen: boolean;
   workspaceTab: WorkspaceTab;
@@ -114,7 +114,7 @@ const initialState: AppState = {
   layers: baseLayers,
   timelineHourOffset: 0,
   playbackRunning: false,
-  copilotOnline: true,
+  assistantOnline: true,
   deployModalOpen: false,
   mapLayerPanelOpen: false,
   workspaceTab: "Dashboard",
