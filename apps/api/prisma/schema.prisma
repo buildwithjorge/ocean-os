@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Beach {
+  id            String              @id @default(cuid())
+  name          String
+  county        String
+  state         String              @default("FL")
+  latitude      Float
+  longitude     Float
+  active        Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  forecasts     Forecast[]
+  observations  Observation[]
+  historyPoints BeachHistoryPoint[]
+  alerts        Alert[]
+  feedEvents    FeedEvent[]
+
+  @@index([county, active])
+  @@index([latitude, longitude])
+}
+
+model Forecast {
+  id                    String   @id @default(cuid())
+  beachId               String
+  issuedAt              DateTime @default(now())
+  riskIndex             Int
+  confidenceScore       Int
+  confidenceLabel       String
+  impactProbability     Int
+  estimatedBiomassMinT  Int
+  estimatedBiomassMaxT  Int
+  arrivalEta            String
+  methodologyNote       String
+  sourceProvider        String
+  rawPayloadJson        String?
+  createdAt             DateTime @default(now())
+  beach                 Beach    @relation(fields: [beachId], references: [id], onDelete: Cascade)
+
+  @@index([beachId, issuedAt])
+  @@index([issuedAt])
+}
+
+model Observation {
+  id              String   @id @default(cuid())
+  beachId         String
+  observedAt      DateTime
+  sourceProvider  String
+  waveHeightM     Float?
+  wavePeriodS     Float?
+  seaTempC        Float?
+  windSpeedMps    Float?
+  confidenceScore Int
+  metadataJson    String?
+  createdAt       DateTime @default(now())
+  beach           Beach    @relation(fields: [beachId], references: [id], onDelete: Cascade)
+
+  @@index([beachId, observedAt])
+  @@index([sourceProvider, observedAt])
+}
+
+model BeachHistoryPoint {
+  id            String   @id @default(cuid())
+  beachId       String
+  timestamp     DateTime
+  riskIndex     Int
+  biomassTons   Int
+  coverageKm2   Float?
+  sourceProvider String
+  createdAt     DateTime @default(now())
+  beach         Beach    @relation(fields: [beachId], references: [id], onDelete: Cascade)
+
+  @@index([beachId, timestamp])
+}
+
+model Alert {
+  id           String   @id @default(cuid())
+  beachId      String
+  title        String
+  message      String
+  severity     String
+  acknowledged Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  acknowledgedAt DateTime?
+  beach        Beach    @relation(fields: [beachId], references: [id], onDelete: Cascade)
+
+  @@index([beachId, severity, acknowledged])
+}
+
+model FeedEvent {
+  id         String   @id @default(cuid())
+  beachId    String?
+  category   String
+  text       String
+  actor      String?
+  createdAt  DateTime @default(now())
+  beach      Beach?   @relation(fields: [beachId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([category, createdAt])
+}
